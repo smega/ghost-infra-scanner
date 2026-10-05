@@ -1,0 +1,2 @@
+pytest>=8.0
+moto[ec2,cloudwatch]>=5.0

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ghost-infra-scanner"
+version = "0.1.0"
+description = "Find orphaned, idle AWS resources that are quietly costing you money."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "boto3>=1.34",
+]
+
+[project.scripts]
+ghost-infra-scanner = "scanner.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["scanner", "scanner.*"]
