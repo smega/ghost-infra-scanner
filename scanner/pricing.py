@@ -1,7 +1,7 @@
 """
 Rough, static USD cost estimates for common AWS resources.
 
-These are NOT pulled from the AWS Price List API or Cost Explorer — they are
+These are NOT pulled from the AWS Price List API or Cost Explorer. They are
 conservative on-demand us-east-1 list prices, hardcoded, so the scanner only
 ever needs read-only Describe/Get permissions (no ce:* / pricing:* access).
 Treat every number here as "ballpark", not an invoice.
@@ -23,7 +23,7 @@ EBS_GB_MONTH_DEFAULT = 0.10
 
 # Elastic IP: AWS started charging for ALL public IPv4 addresses in 2024,
 # whether attached or not. An idle/unassociated EIP carries the same base
-# hourly charge as an attached one — the "waste" here is that it's allocated
+# hourly charge as an attached one. The "waste" here is that it's allocated
 # and doing nothing, not that it's specifically more expensive while idle.
 EIP_HOURLY = 0.005
 EIP_MONTHLY = round(EIP_HOURLY * HOURS_PER_MONTH, 2)  # ~3.65 USD/month

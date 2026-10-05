@@ -16,11 +16,11 @@ def _format_slack_payload(report: dict) -> dict:
     account_id = report["account_id"]
 
     if not findings:
-        text = f"✅ *Ghost Infrastructure scan* for `{account_id}` — nothing found. Clean account."
+        text = f"✅ *Ghost Infrastructure scan* for `{account_id}`: nothing found. Clean account."
         return {"text": text}
 
     lines = [
-        f"👻 *Ghost Infrastructure Report* — account `{account_id}`",
+        f"👻 *Ghost Infrastructure Report*, account `{account_id}`",
         f"Found *{len(findings)}* idle resource(s), estimated *${total}/month* wasted.",
         "",
     ]
@@ -29,7 +29,7 @@ def _format_slack_payload(report: dict) -> dict:
     for f in sorted_findings[:MAX_ITEMS_IN_MESSAGE]:
         label = _LABELS.get(f["resource_type"], f["resource_type"])
         lines.append(
-            f"• *{label}* `{f['resource_id']}` ({f['region']}) — "
+            f"• *{label}* `{f['resource_id']}` ({f['region']}): "
             f"${f['estimated_monthly_cost_usd']}/mo. {f['reason']}"
             + (f" <{f['console_url']}|Open in console>" if f.get("console_url") else "")
         )
