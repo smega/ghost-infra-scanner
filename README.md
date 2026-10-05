@@ -107,6 +107,16 @@ Omit `--slack-webhook-url`/`$SLACK_WEBHOOK_URL` to just get the JSON on stdout, 
 
 Slack gets a condensed, human-readable version of the same thing.
 
+## Want more than three checks?
+
+This repo stays intentionally small: three checks, no account, no dashboard.
+If you want the broader version, same trust model (no standing cloud access,
+your own collector uploads only), there's a hosted version at
+[ghostinfra.smega.eu](https://ghostinfra.smega.eu). It adds idle load
+balancers, old snapshots, oversized non-prod databases, low-CPU running
+instances, tagging gaps, scan history, missed-scan alerts, and exports. A
+free plan is available; the OSS script above works standalone either way.
+
 ## Roadmap
 
 - [ ] Idle Application/Classic Load Balancers (zero healthy targets or zero requests)
