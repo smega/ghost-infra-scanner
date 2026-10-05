@@ -1,0 +1,43 @@
+name: Ghost Infra Scan
+
+on:
+  schedule:
+    - cron: "0 7 * * *"  # daily, 07:00 UTC — adjust to taste
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write   # required for OIDC — no long-lived AWS keys are ever stored
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install scanner
+        run: pip install .
+
+      # Assumes a least-privilege read-only role via OIDC — see iam/scan-policy.json
+      # and iam/trust-policy.json for exactly what this grants (and nothing else).
+      - name: Configure AWS credentials (OIDC, no stored secrets)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_SCAN_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Run scan
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: ghost-infra-scanner --output report.json --slack-webhook-url "$SLACK_WEBHOOK_URL"
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-infra-report
+          path: report.json
+          retention-days: 90
