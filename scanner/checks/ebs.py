@@ -1,4 +1,4 @@
-"""Unattached (status=available) EBS volumes — allocated, billed, doing nothing."""
+"""Unattached (status=available) EBS volumes: allocated, billed, doing nothing."""
 from ..models import Finding
 from ..pricing import ebs_monthly_cost
 
@@ -19,7 +19,7 @@ def check_unattached_volumes(ec2_client, cloudwatch_client, region: str) -> list
                     resource_type="ebs_volume",
                     resource_id=volume_id,
                     region=region,
-                    reason=f"Unattached {volume_type} volume ({size_gb} GB) — not connected to any instance.",
+                    reason=f"Unattached {volume_type} volume ({size_gb} GB), not connected to any instance.",
                     estimated_monthly_cost_usd=cost,
                     metadata={
                         "size_gb": size_gb,

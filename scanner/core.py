@@ -34,7 +34,7 @@ def run_scan(regions: list[str] | None = None, session: boto3.Session | None = N
             for check in ALL_CHECKS:
                 all_findings.extend(f.to_dict() for f in check(ec2, cloudwatch, region))
             scanned_regions.append(region)
-        except Exception as exc:  # noqa: BLE001 — a bad region shouldn't kill the whole scan
+        except Exception as exc:  # noqa: BLE001, a bad region shouldn't kill the whole scan
             errors.append({"region": region, "error": str(exc)})
 
     total_waste = round(sum(f["estimated_monthly_cost_usd"] for f in all_findings), 2)

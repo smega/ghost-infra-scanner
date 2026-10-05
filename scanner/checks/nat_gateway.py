@@ -4,7 +4,7 @@ NAT Gateways that have moved essentially zero traffic in the lookback window.
 A NAT Gateway bills a flat hourly rate regardless of traffic, so one left
 behind after a test environment is torn down (but the gateway wasn't) quietly
 burns money 24/7. We flag gateways whose total bytes processed over the
-lookback period falls under a small threshold — not zero, to tolerate
+lookback period falls under a small threshold, not zero, to tolerate
 background chatter (health checks, DNS, etc.) without false-negatives on
 truly idle gateways.
 """
@@ -56,7 +56,7 @@ def check_idle_nat_gateways(ec2_client, cloudwatch_client, region: str) -> list[
                     region=region,
                     reason=(
                         f"NAT Gateway moved only {total_bytes / 1024:.1f} KB in the last "
-                        f"{LOOKBACK_DAYS} days — likely left behind after a teardown."
+                        f"{LOOKBACK_DAYS} days, likely left behind after a teardown."
                     ),
                     estimated_monthly_cost_usd=NAT_GATEWAY_MONTHLY,
                     metadata={
