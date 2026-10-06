@@ -81,6 +81,14 @@ ghost-infra-scanner --output report.json
 
 Omit `--slack-webhook-url`/`$SLACK_WEBHOOK_URL` to just get the JSON on stdout, useful for piping into `jq` or your own tooling.
 
+### Uploading to the hosted version instead of (or alongside) Slack
+
+```bash
+ghost-infra-scanner --backend-url https://ghostinfra.smega.eu --backend-token cgk_xxx
+```
+
+`--backend-token` is an API key from the hosted dashboard's Settings page (paid plans only). Same no-standing-access model: this POSTs the finished report once, it does not grant the backend any ongoing access to your account.
+
 ## Example output
 
 ```json
