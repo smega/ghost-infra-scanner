@@ -59,6 +59,16 @@ Set up a GitHub OIDC identity provider in your AWS account (one-time, [AWS docs 
 - Trust policy: [`iam/trust-policy.json`](iam/trust-policy.json) (fill in your account ID, org, and repo)
 - Permissions policy: [`iam/scan-policy.json`](iam/scan-policy.json) (use as-is)
 
+GitHub's OIDC `sub` claim now embeds the numeric owner/repo IDs, not just the names, e.g. `repo:yourorg@123/yourrepo@456:ref:refs/heads/main` instead of the older `repo:yourorg/yourrepo:ref:refs/heads/main` shown in most tutorials. The template already uses `StringLike` with `*` wildcards around the IDs to match either format. If role assumption still fails, add a one-off debug step to your workflow to print the actual claims before assuming anything about the format:
+
+```yaml
+- uses: actions/github-script@v7
+  with:
+    script: |
+      const idToken = await core.getIDToken('sts.amazonaws.com');
+      console.log(JSON.stringify(JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString()), null, 2));
+```
+
 ### 2. Add two repo secrets
 
 In your fork/repo's Settings → Secrets and variables → Actions:
