@@ -22,6 +22,15 @@ jobs:
       - name: Install scanner
         run: pip install .
 
+      - name: Debug OIDC token claims (temporary, to be removed)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const idToken = await core.getIDToken('sts.amazonaws.com');
+            const payload = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString());
+            delete payload.jti;
+            console.log(JSON.stringify(payload, null, 2));
+
       # Assumes a least-privilege read-only role via OIDC, see iam/scan-policy.json
       # and iam/trust-policy.json for exactly what this grants (and nothing else).
       - name: Configure AWS credentials (OIDC, no stored secrets)
