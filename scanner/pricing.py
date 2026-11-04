@@ -37,3 +37,15 @@ NAT_GATEWAY_MONTHLY = round(NAT_GATEWAY_HOURLY * HOURS_PER_MONTH, 2)  # ~32.85 U
 def ebs_monthly_cost(volume_type: str, size_gb: int) -> float:
     rate = EBS_GB_MONTH.get(volume_type, EBS_GB_MONTH_DEFAULT)
     return round(rate * size_gb, 2)
+
+# EBS snapshots: USD per GB-month. Snapshots are incremental, so the source
+# volume size is an upper bound on what's actually stored and billed.
+SNAPSHOT_GB_MONTH = {
+    "standard": 0.05,
+    "archive": 0.0125,
+}
+
+
+def snapshot_monthly_cost(size_gb: int, storage_tier: str = "standard") -> float:
+    rate = SNAPSHOT_GB_MONTH.get(storage_tier, SNAPSHOT_GB_MONTH["standard"])
+    return round(rate * size_gb, 2)

@@ -3,7 +3,7 @@
 Finds AWS resources that are allocated, billed, and doing absolutely nothing:
 the unattached EBS volume from a test that never got cleaned up, the Elastic
 IP nobody released, the NAT Gateway still running after the environment it
-served was torn down. Posts a plain-language summary to Slack so you find out
+served was torn down, the snapshots and AMIs left behind by servers long gone. Posts a plain-language summary to Slack so you find out
 before the invoice does.
 
 No dashboard to log into, no agent to install, no standing access to your
@@ -21,8 +21,9 @@ specific resource) or sits behind a paid Business/Enterprise Support plan
 CloudZero, Zesty, …) are built, and priced, for companies spending tens of
 thousands a month, not a five-person startup's $400 bill.
 
-This tool checks for exactly three things, does it well, and gets out of
-your way.
+The goal is simple: flag anything that can keep existing, and keep billing,
+after the thing it belonged to is gone. It starts with the common cases,
+does them well, and gets out of your way.
 
 ## What it checks
 
@@ -31,6 +32,8 @@ your way.
 | Unattached EBS volumes | Volumes in `available` state, not attached to any instance |
 | Unassociated Elastic IPs | Allocated IPs with no `AssociationId` |
 | Idle NAT Gateways | Gateways moving under 5 MB of traffic over the last 7 days |
+| Orphaned EBS snapshots | Your snapshots whose source volume no longer exists and that no AMI of yours uses |
+| Unused AMIs | Your AMIs older than 30 days that no instance runs and no launch template (default or latest version) points at |
 
 Cost estimates are static, conservative, on-demand list prices (see
 [`scanner/pricing.py`](scanner/pricing.py)), not pulled from the Cost
@@ -38,17 +41,20 @@ Explorer or Price List APIs, deliberately, so the scanner never needs
 billing-related permissions. Treat the dollar figures as "ballpark," not an
 invoice line item.
 
-More checks (idle load balancers, orphaned snapshots, unused RDS instances)
-are natural next additions, see [Roadmap](#roadmap).
+Snapshot costs use the source volume size, which is an upper bound:
+snapshots are incremental, so the real bill is usually lower.
+
+More checks (idle load balancers, unused RDS instances, old backups) are
+natural next additions, see [Roadmap](#roadmap).
 
 ## Security model
 
 This is the part that usually matters more than the feature list:
 
 - **No standing access.** The scanner authenticates via [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect): AWS issues short-lived, scoped credentials for the duration of a single workflow run. Nothing is stored, by you, by us (there is no "us" with access, this is just a script), or by GitHub beyond the run itself.
-- **Read-only, enumerated permissions.** The IAM policy the scanner needs is six `Describe`/`Get` actions, nothing else. See [`iam/scan-policy.json`](iam/scan-policy.json), it's short enough to read in full before you attach it.
+- **Read-only, enumerated permissions.** The IAM policy the scanner needs is eleven read-only `Describe`/`Get` actions, nothing else. See [`iam/scan-policy.json`](iam/scan-policy.json), it's short enough to read in full before you attach it.
 - **Nothing leaves your infrastructure except what you choose to send.** The scan runs inside your own GitHub Actions runner, using your own AWS role, and posts to a Slack webhook URL *you* control. There's no third-party backend in this loop at all.
-- **It's ~250 lines of Python.** Read [`scanner/checks/`](scanner/checks/) before you trust it. That's the point of it being open source rather than a SaaS you'd have to take on faith.
+- **It's ~400 lines of Python.** Read [`scanner/checks/`](scanner/checks/) before you trust it. That's the point of it being open source rather than a SaaS you'd have to take on faith.
 
 ## Quickstart
 
@@ -120,8 +126,10 @@ Slack gets a condensed, human-readable version of the same thing.
 ## Roadmap
 
 - [ ] Idle Application/Classic Load Balancers (zero healthy targets or zero requests)
-- [ ] Orphaned EBS snapshots (source volume no longer exists)
 - [ ] Unused RDS instances (no connections in N days)
+- [ ] RDS and AWS Backup snapshots of resources that no longer exist
+- [ ] Detached network interfaces, idle interface VPC endpoints
+- [ ] AMIs referenced only by Auto Scaling launch configurations (currently not checked, so such AMIs may be flagged)
 - [ ] GCP equivalent checks
 
 ## Contributing
